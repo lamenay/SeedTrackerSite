@@ -5,16 +5,14 @@ load_dotenv()
 
 class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'super-secret-key-seedtracker-2026')
-    BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
-    # Use DATABASE_URL from environment (Render provides PostgreSQL URL)
-    # Fallback to SQLite for local development
-    DATABASE_URL = os.getenv('DATABASE_URL', '')
-    # Render uses "postgres://" but SQLAlchemy needs "postgresql://"
-    if DATABASE_URL.startswith('postgres://'):
-        DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
+    # База данных
+    _db_url = os.getenv('DATABASE_URL', '')
+    if _db_url.startswith('postgres://'):
+        _db_url = _db_url.replace('postgres://', 'postgresql://', 1)
 
-    SQLALCHEMY_DATABASE_URI = DATABASE_URL or f'sqlite:///{os.path.join(BASE_DIR, "..", "instance", "seedtracker.db")}'
+    # Если DATABASE_URL не задан — используем /tmp (единственное место где SQLite работает на Render)
+    SQLALCHEMY_DATABASE_URI = _db_url if _db_url else 'sqlite:////tmp/seedtracker.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Yandex OAuth
