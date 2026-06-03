@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card-nature">
+            <h2>🌱 Новая посадка</h2>
+            <p class="text-muted">Посадите семена и начните отслеживание роста</p>
+
+            <form method="POST">
+                {{ form.hidden_tag() }}
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">🌿 Выберите семена</label>
+                    <select name="seed_id" class="form-select" required onchange="fillFromSeed(this.value)">
+                        <option value="">— Выберите из ваших семян —</option>
+                        {% for seed in seeds %}
+                        <option value="{{ seed.id }}"
+                                data-crop="{{ seed.crop_name }}"
+                                data-variety="{{ seed.variety or '' }}"
+                                data-remaining="{{ seed.remaining_seeds }}"
+                                data-watering="{{ seed.catalog_entry.watering_interval_days if seed.catalog_entry else '' }}"
+                                data-harvest="{{ seed.catalog_entry.days_to_harvest if seed.catalog_entry else '' }}">
+                            {{ seed.crop_name }} {% if seed.variety %}— {{ seed.variety }}{% endif %}
+                            (осталось: {{ seed.remaining_seeds }} шт.)
+                        </option>
+                        {% endfor %}
+                    </select>
+                    {% if not seeds %}
+                    <div class="form-text text-warning">
+                        ⚠️ У вас пока нет семян. <a href="{{ url_for('plantings.add_seed') }}">Добавьте семена</a> сначала.
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div id="seedInfo" class="alert alert-success d-none" style="background: var(--green-pale); border-color: var(--green-light); color: var(--green-dark);">
+                    <strong id="seedInfoName"></strong>
+                    <span id="seedInfoDetails" class="d-block small mt-1"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">📅 Дата посева</label>
+                        {{ form.sowing_date(class="form-control") }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">🔢 Количество семян</label>
+                        {{ form.quantity_sown(class="form-control", placeholder="Сколько семян посажено") }}
+                        <div class="form-text" id="remainingHint"></div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">📍 Место посадки</label>
+                    {{ form.location(class="form-control", placeholder="Грядка №1, теплица, балкон...") }}
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">💧 Интервал полива (дней)</label>
+                        {{ form.watering_interval(class="form-control", placeholder="Каждые N дней") }}
+                        <div class="form-text">Заполнится автоматически из справочника</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">🌾 Дней до урожая</label>
+                        {{ form.days_to_harvest(class="form-control", placeholder="Примерное количество дней") }}
+                        <div class="form-text">Заполнится автоматически из справочника</div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">📝 Заметки</label>
+                    {{ form.notes(class="form-control", rows="3", placeholder="Особые условия, удобрения...") }}
+                </div>
+
+                {% if weather %}
+                <div class="card-nature mb-3" style="background: linear-gradient(135deg, var(--water-blue-pale, #e8f4fd), var(--green-pale));">
+                    <h5>🌤 Погода в г. {{ current_user.city }}</h5>
+                    <div class="row text-center">
+                        {% for day in weather[:5] %}
+                        <div class="col">
+                            <div class="small text-muted">{{ day.date[5:] }}</div>
+                            <div class="fw-bold">{{ day.temp_max }}°</div>
+                            <div class="small">{{ day.temp_min }}°</div>
+                            {% if day.precipitation and day.precipitation > 0 %}
+                            <div class="small text-primary">🌧 {{ day.precipitation }}мм</div>
+                            {% else %}
+                            <div class="small text-muted">☀️</div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-nature">🌱 Посадить</button>
+                    <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary">Отмена</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function fillFromSeed(seedId) {
+    const select = document.querySelector('select[name="seed_id"]');
+    const option = select.options[select.selectedIndex];
+    const infoBlock = document.getElementById('seedInfo');
+    const infoName = document.getElementById('seedInfoName');
+    const infoDetails = document.getElementById('seedInfoDetails');
+    const remainingHint = document.getElementById('remainingHint');
+
+    if (!seedId) {
+        infoBlock.classList.add('d-none');
+        remainingHint.textContent = '';
+        return;
+    }
+
+    const crop = option.dataset.crop;
+    const variety = option.dataset.variety;
+    const remaining = option.dataset.remaining;
+    const watering = option.dataset.watering;
+    const harvest = option.dataset.harvest;
+
+    infoName.textContent = crop + (variety ? ' — ' + variety : '');
+    let details = 'Осталось семян: ' + remaining;
+    if (watering) details += ' | Полив: каждые ' + watering + ' дней';
+    if (harvest) details += ' | Созревание: ' + harvest + ' дней';
+    infoDetails.textContent = details;
+    infoBlock.classList.remove('d-none');
+
+    remainingHint.textContent = 'Доступно: ' + remaining + ' шт.';
+
+    if (watering) document.getElementById('watering_interval').value = watering;
+    if (harvest) document.getElementById('days_to_harvest').value = harvest;
+}
+</script>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex gap-2 mb-4 flex-wrap">
+    <a href="{{ url_for('admin.index') }}"
+       class="btn btn-sm {% if request.endpoint == 'admin.index' %}btn-nature{% else %}btn-outline-secondary{% endif %}">
+        📊 Обзор
+    </a>
+    <a href="{{ url_for('admin.users') }}"
+       class="btn btn-sm {% if request.endpoint == 'admin.users' %}btn-nature{% else %}btn-outline-secondary{% endif %}">
+        👥 Пользователи
+    </a>
+    <a href="{{ url_for('admin.catalog') }}"
+       class="btn btn-sm {% if request.endpoint in ('admin.catalog','admin.catalog_add','admin.catalog_edit') %}btn-nature{% else %}btn-outline-secondary{% endif %}">
+        📚 Справочник культур
+    </a>
+    <a href="{{ url_for('admin.stats') }}"
+       class="btn btn-sm {% if request.endpoint == 'admin.stats' %}btn-nature{% else %}btn-outline-secondary{% endif %}">
+        📈 Статистика
+    </a>
+</div>
+
+{% block admin_content %}{% endblock %}
+{% endblock %}

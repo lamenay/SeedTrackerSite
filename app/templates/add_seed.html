@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="mb-4" style="color: var(--green-dark);">🌱 Добавить семена</h2>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body p-4">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+
+                    <!-- Выбор из справочника -->
+                    <div class="mb-4 p-3" style="background: var(--green-bg); border-radius: 12px; border: 2px dashed var(--green-pale);">
+                        <label class="form-label">📖 Выбрать из справочника сортов</label>
+                        {{ form.catalog_id(class="form-select", id="catalog-select") }}
+                        <small class="text-muted">Выберите сорт — поля «Культура», «Сорт» заполнятся автоматически</small>
+                        <div id="catalog-info" class="mt-2" style="display:none;">
+                            <div class="alert alert-success mb-0 py-2">
+                                <span id="catalog-info-text"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.crop_name.label(class="form-label") }}
+                            {{ form.crop_name(class="form-control", id="crop-name") }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.variety.label(class="form-label") }}
+                            {{ form.variety(class="form-control", id="variety") }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.manufacturer.label(class="form-label") }}
+                        {{ form.manufacturer(class="form-control") }}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.purchase_date.label(class="form-label") }}
+                            {{ form.purchase_date(class="form-control") }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.expiry_date.label(class="form-label") }}
+                            {{ form.expiry_date(class="form-control") }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.packets_count.label(class="form-label") }}
+                            {{ form.packets_count(class="form-control") }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.seeds_per_packet.label(class="form-label") }}
+                            {{ form.seeds_per_packet(class="form-control") }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.notes.label(class="form-label") }}
+                        {{ form.notes(class="form-control", rows=3) }}
+                    </div>
+
+                    <button type="submit" class="btn btn-nature btn-lg w-100">
+                        🌾 Сохранить семена
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Catalog data embedded from server
+    const catalogData = {
+        {% for item in catalog_items %}
+        {{ item.id }}: {
+            crop_name: "{{ item.crop_name }}",
+            variety: "{{ item.variety }}",
+            watering_interval_days: {{ item.watering_interval_days }},
+            days_to_harvest: {{ item.days_to_harvest }},
+            description: "{{ item.description or '' }}",
+            emoji: "{{ item.emoji }}"
+        },
+        {% endfor %}
+    };
+
+    document.getElementById('catalog-select').addEventListener('change', function() {
+        const id = parseInt(this.value);
+        const infoDiv = document.getElementById('catalog-info');
+        const infoText = document.getElementById('catalog-info-text');
+
+        if (id && catalogData[id]) {
+            const item = catalogData[id];
+            document.getElementById('crop-name').value = item.crop_name;
+            document.getElementById('variety').value = item.variety;
+            infoText.innerHTML = `${item.emoji} <strong>${item.crop_name} — ${item.variety}</strong>: полив каждые ${item.watering_interval_days} дн., созревание ${item.days_to_harvest} дн. ${item.description ? '— ' + item.description : ''}`;
+            infoDiv.style.display = 'block';
+        } else {
+            infoDiv.style.display = 'none';
+        }
+    });
+</script>
+{% endblock %}

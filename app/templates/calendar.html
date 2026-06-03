@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="mb-4">
+    <h2>🌸 Календарь цветения и созревания</h2>
+    <p class="text-muted">Что цветёт и созревает в каждом месяце (средняя полоса России)</p>
+</div>
+
+{% set month_names = {1: 'Январь', 2: 'Февраль', 3: 'Март', 4: 'Апрель', 5: 'Май', 6: 'Июнь', 7: 'Июль', 8: 'Август', 9: 'Сентябрь', 10: 'Октябрь', 11: 'Ноябрь', 12: 'Декабрь'} %}
+{% set month_icons = {1: '❄️', 2: '🌨', 3: '🌱', 4: '🌿', 5: '🌸', 6: '☀️', 7: '🌻', 8: '🍎', 9: '🍂', 10: '🎃', 11: '🍁', 12: '⛄'} %}
+
+<div class="row g-3">
+    {% for month_num in range(1, 13) %}
+    {% set events = calendar_data.get(month_num, []) %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card-nature h-100">
+            <h5 class="mb-3">
+                {{ month_icons[month_num] }} {{ month_names[month_num] }}
+                {% if current_month == month_num %}
+                <span class="badge" style="background: var(--green-main); color: white; font-size: 0.7rem;">сейчас</span>
+                {% endif %}
+            </h5>
+
+            {% if events %}
+            {% for event in events %}
+            <div class="d-flex align-items-start mb-2 p-2" style="background: var(--green-pale); border-radius: 8px;">
+                <span class="me-2">{{ event.emoji }}</span>
+                <div>
+                    <strong class="small">{{ event.plant_name }}</strong>
+                    <span class="small ms-1
+                        {% if event.event_type == 'цветение' %}text-success
+                        {% elif event.event_type == 'созревание' %}text-warning
+                        {% elif event.event_type == 'посадка' %}text-info
+                        {% else %}text-muted{% endif %}">
+                        · {{ event.event_type }}
+                    </span>
+                    {% if event.description %}
+                    <div class="small text-muted">{{ event.description }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p class="text-muted small mb-0">Нет событий</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

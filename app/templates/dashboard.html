@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="mb-4" style="color: var(--green-dark);">
+    👋 Добро пожаловать, {{ current_user.username }}!
+</h2>
+
+<!-- Watering alerts -->
+{% if watering_alerts %}
+<div class="mb-4">
+    <h5 style="color: var(--green-dark);">💧 Уведомления о поливе</h5>
+    {% for alert in watering_alerts %}
+    <div class="watering-alert {{ 'rain' if alert.info.advice == 'rain_expected' else 'urgent' if alert.info.advice == 'water_now' else '' }}">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <strong>{{ alert.planting.seed.crop_name }}</strong>
+                <small class="text-muted">{{ alert.planting.seed.variety or '' }}</small>
+                — {{ alert.info.message }}
+            </div>
+            <div class="d-flex gap-2">
+                {% if alert.info.advice == 'rain_expected' %}
+                <form method="POST" action="{{ url_for('plantings.rain_skip', planting_id=alert.planting.id) }}" class="d-inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-rain btn-sm">🌧 Дождь полил</button>
+                </form>
+                {% endif %}
+                <form method="POST" action="{{ url_for('plantings.mark_watered', planting_id=alert.planting.id) }}" class="d-inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-water btn-sm">💧 Я полил</button>
+                </form>
+                <a href="{{ url_for('plantings.planting_detail', planting_id=alert.planting.id) }}"
+                   class="btn btn-outline-nature btn-sm">Подробнее</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="row mb-4 g-3">
+    <div class="col-md-4">
+        <div class="card stat-card h-100">
+            <h3>{{ seeds_count }}</h3>
+            <p>видов семян</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card h-100">
+            <h3>{{ plantings|length }}</h3>
+            <p>активных посадок</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <a href="{{ url_for('plantings.add_planting') }}"
+           class="btn btn-nature w-100 h-100 d-flex align-items-center justify-content-center fs-5"
+           style="min-height: 110px; border-radius: 16px;">
+            <i class="fas fa-plus me-2"></i> Новая посадка
+        </a>
+    </div>
+</div>
+
+<h4 class="mb-3" style="color: var(--green-dark);">🌿 Мои посадки</h4>
+
+{% if plantings %}
+<div class="row g-3">
+    {% for planting in plantings %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 style="color: var(--green-dark);">
+                    {{ planting.seed.crop_name }}
+                    <small class="text-muted">{{ planting.seed.variety or '' }}</small>
+                </h5>
+
+                <p class="mb-1">
+                    <span class="badge-nature">Посев: {{ planting.sowing_date.strftime('%d.%m.%Y') }}</span>
+                </p>
+
+                {% if planting.expected_harvest_date %}
+                <p class="mb-1">
+                    <span class="badge-harvest">Урожай ≈ {{ planting.expected_harvest_date.strftime('%d.%m.%Y') }}</span>
+                </p>
+                {% endif %}
+
+                {% if planting.watering_interval %}
+                <p class="mb-1">
+                    <span class="badge-water">💧 каждые {{ planting.watering_interval }} дн.</span>
+                </p>
+                {% endif %}
+
+                <p class="mb-0 text-muted"><small>📍 {{ planting.location or 'Место не указано' }}</small></p>
+            </div>
+            <div class="card-footer bg-transparent d-flex gap-2">
+                <a href="{{ url_for('plantings.planting_detail', planting_id=planting.id) }}"
+                   class="btn btn-outline-nature flex-fill btn-sm">Подробнее</a>
+                <a href="{{ url_for('plantings.delete_planting', planting_id=planting.id) }}"
+                   class="btn btn-outline-danger flex-fill btn-sm"
+                   onclick="return confirm('Удалить эту посадку?')">Удалить</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card text-center py-5">
+    <div class="card-body">
+        <div class="fs-1 mb-3">🌿</div>
+        <h5 style="color: var(--green-dark);">У вас пока нет посадок</h5>
+        <p class="text-muted">Добавьте первую посадку и начните вести свой садовый дневник</p>
+        <a href="{{ url_for('plantings.add_planting') }}" class="btn btn-nature mt-2">
+            Создать первую посадку →
+        </a>
+    </div>
+</div>
+{% endif %}
+
+<div class="mt-4 text-center d-flex gap-2 justify-content-center flex-wrap">
+    <a href="{{ url_for('calendar.calendar') }}" class="btn btn-outline-nature">
+        📅 Календарь цветения
+    </a>
+    <a href="{{ url_for('plantings.seeds') }}" class="btn btn-outline-earth">
+        🌾 Мои семена
+    </a>
+</div>
+{% endblock %}

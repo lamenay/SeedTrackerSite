@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="hero-section text-center my-4">
+    <h1 class="display-4 fw-bold" style="color: var(--green-dark);">🌱 SeedTracker</h1>
+    <p class="lead fs-4 mt-3" style="color: var(--green-main);">
+        Личный журнал семян и рассады с умным помощником полива
+    </p>
+    <p class="text-muted fs-5">Ведите учёт посадок, следите за погодой, получайте напоминания</p>
+
+    <div class="mt-4 d-flex justify-content-center gap-3 flex-wrap">
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('main.dashboard') }}" class="btn btn-nature btn-lg px-5 py-3">
+            🏡 Перейти в дашборд
+        </a>
+        {% else %}
+        <a href="{{ url_for('auth.register') }}" class="btn btn-nature btn-lg px-5 py-3">
+            Начать бесплатно
+        </a>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-nature btn-lg px-4 py-3">
+            Войти
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-10">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 text-center p-4">
+                    <div class="fs-1 mb-2">🌾</div>
+                    <h5 style="color: var(--green-dark);">Учёт семян</h5>
+                    <p class="text-muted">Храните информацию о всех семенах, сортах и производителях в одном месте</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 text-center p-4">
+                    <div class="fs-1 mb-2">🌧</div>
+                    <h5 style="color: var(--green-dark);">Умный полив</h5>
+                    <p class="text-muted">Приложение учитывает прогноз дождя и подсказывает, когда поливать не нужно</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 text-center p-4">
+                    <div class="fs-1 mb-2">📅</div>
+                    <h5 style="color: var(--green-dark);">Календарь</h5>
+                    <p class="text-muted">Справочник цветения и созревания растений для средней полосы России</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-center mt-4 mb-5">
+    <div class="col-md-10">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 text-center p-4">
+                    <div class="fs-1 mb-2">📖</div>
+                    <h5 style="color: var(--green-dark);">Справочник сортов</h5>
+                    <p class="text-muted">База данных популярных культур с информацией о поливе и сроках созревания</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 text-center p-4">
+                    <div class="fs-1 mb-2">📴</div>
+                    <h5 style="color: var(--green-dark);">Работа без интернета</h5>
+                    <p class="text-muted">Основные функции доступны офлайн — идеально для дачи без связи</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 text-center p-4">
+                    <div class="fs-1 mb-2">🔐</div>
+                    <h5 style="color: var(--green-dark);">Вход через Яндекс</h5>
+                    <p class="text-muted">Быстрая регистрация и вход через аккаунт Яндекс</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

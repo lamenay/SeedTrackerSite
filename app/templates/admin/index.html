@@ -1,0 +1,53 @@
+{% extends 'admin/base_admin.html' %}
+{% block admin_content %}
+<h2 class="mb-4">🛠 Панель администратора</h2>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card-nature text-center">
+            <div style="font-size:2rem;">👥</div>
+            <div class="fw-bold fs-3">{{ users_count }}</div>
+            <div class="text-muted small">Пользователей</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card-nature text-center">
+            <div style="font-size:2rem;">🌱</div>
+            <div class="fw-bold fs-3">{{ seeds_count }}</div>
+            <div class="text-muted small">Записей семян</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card-nature text-center">
+            <div style="font-size:2rem;">🪴</div>
+            <div class="fw-bold fs-3">{{ plantings_count }}</div>
+            <div class="text-muted small">Посадок</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card-nature text-center">
+            <div style="font-size:2rem;">📚</div>
+            <div class="fw-bold fs-3">{{ catalog_count }}</div>
+            <div class="text-muted small">Культур в справочнике</div>
+        </div>
+    </div>
+</div>
+
+<div class="card-nature">
+    <h5 class="mb-3">🆕 Последние зарегистрированные</h5>
+    <table class="table table-sm mb-0">
+        <thead><tr><th>ID</th><th>Имя</th><th>Email</th><th>Город</th><th>Админ</th></tr></thead>
+        <tbody>
+        {% for u in recent_users %}
+        <tr>
+            <td>{{ u.id }}</td>
+            <td>{{ u.username }}</td>
+            <td>{{ u.email }}</td>
+            <td>{{ u.city }}</td>
+            <td>{% if u.is_admin %}<span class="badge bg-danger">Да</span>{% else %}—{% endif %}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

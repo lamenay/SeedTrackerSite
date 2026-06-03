@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-body p-5">
+                <h3 class="text-center mb-4" style="color: var(--green-dark);">🌱 Вход в SeedTracker</h3>
+
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+
+                    <div class="mb-3">
+                        {{ form.email.label(class="form-label") }}
+                        {{ form.email(class="form-control", placeholder="your@email.com") }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.password.label(class="form-label") }}
+                        {{ form.password(class="form-control") }}
+                    </div>
+
+                    <button type="submit" class="btn btn-nature w-100 py-2 mb-3">Войти</button>
+                </form>
+
+                <div class="divider"></div>
+
+                <div class="text-center">
+                    <p class="text-muted mb-2">или войдите через</p>
+                    <a href="{{ url_for('auth.yandex_login') }}" class="yandex-btn w-100 d-flex justify-content-center">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.5 15.5h-2.1V9.84L8.95 17.5H7.28l2.46-7.66C10.34 8.08 11.13 7 12.5 7c1.6 0 2.5 1 2.5 2.8v7.7h-1.5z"/></svg>
+                        Войти через Яндекс
+                    </a>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('auth.register') }}" style="color: var(--green-main); font-weight: 600;">
+                        Нет аккаунта? Зарегистрироваться
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

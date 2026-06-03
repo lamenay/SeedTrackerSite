@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card-nature">
+            <h2 class="mb-4">⚙️ Настройки</h2>
+
+            <form method="POST">
+                {{ form.hidden_tag() }}
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">🏙 Ваш город</label>
+                    {{ form.city(class="form-control", placeholder="Например: Москва") }}
+                    <div class="form-text">Город используется для прогноза погоды и умного полива</div>
+                </div>
+
+                <div class="card-nature mb-4" style="background: var(--green-pale);">
+                    <h6>👤 Информация о профиле</h6>
+                    <div class="small">
+                        <div class="mb-1"><strong>Имя:</strong> {{ current_user.username }}</div>
+                        <div class="mb-1"><strong>Email:</strong> {{ current_user.email }}</div>
+                        {% if current_user.yandex_id %}
+                        <div class="mb-1">
+                            <span class="badge" style="background: #fc3f1d; color: white;">Я</span>
+                            Привязан Яндекс аккаунт
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-nature w-100">💾 Сохранить настройки</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'admin/base_admin.html' %}
+{% block admin_content %}
+<h2 class="mb-4">📈 Статистика по пользователям</h2>
+
+<div class="card-nature">
+    <table class="table table-sm mb-0">
+        <thead>
+            <tr><th>Пользователь</th><th>Email</th><th>Семян</th><th>Посадок</th></tr>
+        </thead>
+        <tbody>
+        {% for row in data %}
+        <tr>
+            <td>
+                {{ row.user.username }}
+                {% if row.user.is_admin %}<span class="badge bg-danger ms-1">Админ</span>{% endif %}
+            </td>
+            <td>{{ row.user.email }}</td>
+            <td>{{ row.seeds }}</td>
+            <td>{{ row.plantings }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
