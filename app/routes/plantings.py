@@ -204,8 +204,6 @@ def rain_skip(planting_id):
 def delete_planting(planting_id):
     planting = Planting.query.get_or_404(planting_id)
     if planting.user_id == current_user.id:
-        if planting.seed:
-            planting.seed.remaining_seeds += planting.quantity_sown
         db.session.delete(planting)
         db.session.commit()
         flash('Посадка удалена', 'info')
@@ -220,9 +218,7 @@ def delete_seed(seed_id):
     if seed.user_id != current_user.id:
         flash('Доступ запрещён', 'danger')
         return redirect(url_for('plantings.seeds'))
-    if seed.remaining_seeds > 0:
-        flash('Нельзя удалить семена с остатком больше 0', 'warning')
-        return redirect(url_for('plantings.seeds'))
+    Planting.query.filter_by(seed_id=seed.id).delete()
     db.session.delete(seed)
     db.session.commit()
     flash('Запись о семенах удалена', 'info')

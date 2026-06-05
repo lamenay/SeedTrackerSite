@@ -48,8 +48,11 @@
             {% if seed.notes %}
             <div class="small text-muted mt-2">📝 {{ seed.notes }}</div>
             {% endif %}
-            <div class="mt-3">
+            <div class="mt-3 d-flex justify-content-between align-items-center">
                 <small class="text-muted">Посадок: {{ seed.plantings | length }}</small>
+                <a href="{{ url_for('plantings.delete_seed', seed_id=seed.id) }}"
+                   class="btn btn-outline-danger btn-sm"
+                   onclick="return confirm('Удалить семена «{{ seed.crop_name }}»? Связанные посадки тоже будут удалены.')">🗑 Удалить</a>
             </div>
         </div>
     </div>

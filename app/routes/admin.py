@@ -50,10 +50,12 @@ def toggle_admin(user_id):
     if user.id == current_user.id:
         flash('Нельзя изменить свои собственные права.', 'warning')
         return redirect(url_for('admin.users'))
-    user.is_admin = not user.is_admin
+    if user.is_admin:
+        flash('Нельзя снять права администратора у другого админа.', 'warning')
+        return redirect(url_for('admin.users'))
+    user.is_admin = True
     db.session.commit()
-    status = 'назначен администратором' if user.is_admin else 'лишён прав администратора'
-    flash(f'Пользователь {user.username} {status}.', 'success')
+    flash(f'Пользователь {user.username} назначен администратором.', 'success')
     return redirect(url_for('admin.users'))
 
 
@@ -64,6 +66,9 @@ def delete_user(user_id):
     user = User.query.get_or_404(user_id)
     if user.id == current_user.id:
         flash('Нельзя удалить самого себя.', 'warning')
+        return redirect(url_for('admin.users'))
+    if user.is_admin:
+        flash('Нельзя удалить другого администратора.', 'warning')
         return redirect(url_for('admin.users'))
     # Удаляем посадки и семена пользователя
     Planting.query.filter_by(user_id=user.id).delete()

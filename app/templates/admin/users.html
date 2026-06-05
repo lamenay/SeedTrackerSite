@@ -5,8 +5,8 @@
     <span class="badge-nature">Всего: {{ users | length }}</span>
 </div>
 
-<div class="card-nature">
-    <table class="table table-sm mb-0">
+<div class="card-nature" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+    <table class="table table-sm mb-0" style="min-width: 600px;">
         <thead>
             <tr><th>ID</th><th>Имя</th><th>Email</th><th>Город</th><th>Яндекс</th><th>Роль</th><th>Действия</th></tr>
         </thead>
@@ -20,13 +20,13 @@
             <td>{% if u.yandex_id %}<span class="badge" style="background:#fc3f1d;color:white;">Я</span>{% else %}—{% endif %}</td>
             <td>{% if u.is_admin %}<span class="badge bg-danger">Админ</span>{% else %}<span class="badge bg-secondary">Пользователь</span>{% endif %}</td>
             <td>
+                {% if not u.is_admin %}
                 <form method="POST" action="{{ url_for('admin.toggle_admin', user_id=u.id) }}" class="d-inline">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <button class="btn btn-outline-warning btn-sm" title="Переключить роль">
-                        {% if u.is_admin %}👤{% else %}👑{% endif %}
-                    </button>
+                    <button class="btn btn-outline-warning btn-sm" title="Назначить админом">👑</button>
                 </form>
-                {% if u.id != current_user.id %}
+                {% endif %}
+                {% if u.id != current_user.id and not u.is_admin %}
                 <form method="POST" action="{{ url_for('admin.delete_user', user_id=u.id) }}" class="d-inline"
                       onsubmit="return confirm('Удалить пользователя {{ u.username }}?')">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
