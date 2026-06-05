@@ -48,12 +48,3 @@ def settings():
 
     form.city.data = current_user.city
     return render_template('settings.html', form=form)
-from flask import current_app
-
-@main.route('/sw.js')
-def sw():
-    return current_app.send_static_file('sw.js')
-
-@main.route('/manifest.json')
-def manifest():
-    return current_app.send_static_file('manifest.json')
