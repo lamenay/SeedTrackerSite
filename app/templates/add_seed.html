@@ -41,22 +41,34 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             {{ form.purchase_date.label(class="form-label") }}
-                            {{ form.purchase_date(class="form-control") }}
+                            {{ form.purchase_date(class="form-control", max=today_str) }}
+                            {% for error in form.purchase_date.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
                         </div>
                         <div class="col-md-6 mb-3">
                             {{ form.expiry_date.label(class="form-label") }}
                             {{ form.expiry_date(class="form-control") }}
+                            {% for error in form.expiry_date.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             {{ form.packets_count.label(class="form-label") }}
-                            {{ form.packets_count(class="form-control") }}
+                            {{ form.packets_count(class="form-control", min=1) }}
+                            {% for error in form.packets_count.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
                         </div>
                         <div class="col-md-6 mb-3">
                             {{ form.seeds_per_packet.label(class="form-label") }}
-                            {{ form.seeds_per_packet(class="form-control") }}
+                            {{ form.seeds_per_packet(class="form-control", min=1) }}
+                            {% for error in form.seeds_per_packet.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
                         </div>
                     </div>
 

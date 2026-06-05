@@ -45,7 +45,10 @@
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">🔢 Количество семян</label>
-                        {{ form.quantity_sown(class="form-control", placeholder="Сколько семян посажено") }}
+                        {{ form.quantity_sown(class="form-control", placeholder="Сколько семян посажено", min=1) }}
+                        {% for error in form.quantity_sown.errors %}
+                        <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
                         <div class="form-text" id="remainingHint"></div>
                     </div>
                 </div>

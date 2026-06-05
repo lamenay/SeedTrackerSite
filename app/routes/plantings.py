@@ -32,7 +32,18 @@ def add_seed():
     ]
 
     if form.validate_on_submit():
-        total_seeds = (form.packets_count.data or 1) * (form.seeds_per_packet.data or 0)
+        packets = form.packets_count.data or 1
+        seeds_per = form.seeds_per_packet.data or 1
+
+        # Проверка на переполнение при вычислении общего количества
+        try:
+            total_seeds = packets * seeds_per
+            if total_seeds > 2_000_000_000:
+                flash('Слишком большое общее количество семян. Уменьшите количество пакетиков или семян в пакетике.', 'danger')
+                return render_template('add_seed.html', form=form, catalog_items=catalog_items, today_str=date.today().isoformat())
+        except (OverflowError, ValueError):
+            flash('Слишком большое значение. Пожалуйста, введите разумное количество.', 'danger')
+            return render_template('add_seed.html', form=form, catalog_items=catalog_items, today_str=date.today().isoformat())
 
         seed = Seed(
             user_id=current_user.id,
@@ -41,17 +52,27 @@ def add_seed():
             manufacturer=form.manufacturer.data,
             purchase_date=form.purchase_date.data,
             expiry_date=form.expiry_date.data,
-            packets_count=form.packets_count.data or 1,
-            seeds_per_packet=form.seeds_per_packet.data or 0,
+            packets_count=packets,
+            seeds_per_packet=seeds_per,
             remaining_seeds=total_seeds,
             catalog_id=form.catalog_id.data if form.catalog_id.data else None,
             notes=form.notes.data
         )
-        db.session.add(seed)
-        db.session.commit()
+
+        try:
+            db.session.add(seed)
+            db.session.commit()
+        except (OverflowError, Exception) as e:
+            db.session.rollback()
+            if 'too large' in str(e).lower() or isinstance(e, OverflowError):
+                flash('Слишком большое значение для сохранения в базу данных. Уменьшите количество.', 'danger')
+            else:
+                flash(f'Ошибка при сохранении: {e}', 'danger')
+            return render_template('add_seed.html', form=form, catalog_items=catalog_items, today_str=date.today().isoformat())
+
         flash('Семена успешно добавлены!', 'success')
         return redirect(url_for('plantings.seeds'))
-    return render_template('add_seed.html', form=form, catalog_items=catalog_items)
+    return render_template('add_seed.html', form=form, catalog_items=catalog_items, today_str=date.today().isoformat())
 
 
 @plantings.route('/api/catalog/<int:catalog_id>')
@@ -81,6 +102,11 @@ def add_planting():
     if form.validate_on_submit():
         seed = Seed.query.get_or_404(form.seed_id.data)
 
+        # Проверка на просроченные семена
+        if seed.expiry_date and seed.expiry_date <= date.today():
+            flash(f'Нельзя посадить просроченные семена! Срок годности «{seed.crop_name}» истёк {seed.expiry_date.strftime("%d.%m.%Y")}.', 'danger')
+            return redirect(url_for('plantings.add_planting'))
+
         if seed.remaining_seeds < form.quantity_sown.data:
             flash(f'Недостаточно семян! Осталось: {seed.remaining_seeds}', 'danger')
             return redirect(url_for('plantings.add_planting'))
@@ -102,8 +128,16 @@ def add_planting():
 
         seed.remaining_seeds -= form.quantity_sown.data
 
-        db.session.add(planting)
-        db.session.commit()
+        try:
+            db.session.add(planting)
+            db.session.commit()
+        except (OverflowError, Exception) as e:
+            db.session.rollback()
+            if 'too large' in str(e).lower() or isinstance(e, OverflowError):
+                flash('Слишком большое значение. Пожалуйста, введите разумное количество.', 'danger')
+            else:
+                flash(f'Ошибка при сохранении: {e}', 'danger')
+            return redirect(url_for('plantings.add_planting'))
 
         flash(f'Посадка "{seed.crop_name}" добавлена! Осталось: {seed.remaining_seeds} семян', 'success')
         return redirect(url_for('main.dashboard'))

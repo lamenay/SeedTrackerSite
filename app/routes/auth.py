@@ -2,6 +2,7 @@ import requests
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app, session
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy.exc import IntegrityError
 
 from app import db
 from app.models import User
@@ -19,7 +20,7 @@ def register():
     if form.validate_on_submit():
         existing_user = User.query.filter_by(email=form.email.data).first()
         if existing_user:
-            flash('Пользователь с таким email уже существует', 'danger')
+            flash('Пользователь с таким email уже зарегистрирован. Попробуйте войти или используйте другой email.', 'warning')
             return redirect(url_for('auth.register'))
 
         user = User(
@@ -27,8 +28,13 @@ def register():
             email=form.email.data,
             password_hash=generate_password_hash(form.password.data)
         )
-        db.session.add(user)
-        db.session.commit()
+        try:
+            db.session.add(user)
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            flash('Пользователь с таким email уже зарегистрирован. Попробуйте войти или используйте другой email.', 'warning')
+            return redirect(url_for('auth.register'))
 
         flash('Регистрация прошла успешно! Теперь можно войти.', 'success')
         return redirect(url_for('auth.login'))
@@ -136,17 +142,9 @@ def yandex_callback():
                 # Привязываем Яндекс ID к существующему аккаунту
                 user.yandex_id = yandex_id
             else:
-                # Создаём нового пользователя
-                # Уникализируем username если занят
-                base_username = display_name
-                username = base_username
-                counter = 1
-                while User.query.filter_by(username=username).first():
-                    username = f"{base_username}_{counter}"
-                    counter += 1
-
+                # Создаём нового пользователя (ник не обязан быть уникальным)
                 user = User(
-                    username=username,
+                    username=display_name,
                     email=email,
                     yandex_id=yandex_id,
                     password_hash=None

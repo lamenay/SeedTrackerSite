@@ -20,11 +20,11 @@
             </div>
             <div class="col-6">
                 <label class="form-label">Интервал полива (дн.)</label>
-                <input name="watering_interval_days" type="number" class="form-control" value="{{ entry.watering_interval_days if entry else 7 }}" required>
+                <input name="watering_interval_days" type="number" class="form-control" min="1" value="{{ entry.watering_interval_days if entry else 7 }}" required>
             </div>
             <div class="col-6">
                 <label class="form-label">Дней до урожая</label>
-                <input name="days_to_harvest" type="number" class="form-control" value="{{ entry.days_to_harvest if entry else 60 }}" required>
+                <input name="days_to_harvest" type="number" class="form-control" min="1" value="{{ entry.days_to_harvest if entry else 60 }}" required>
             </div>
             <div class="col-12">
                 <label class="form-label">Описание</label>

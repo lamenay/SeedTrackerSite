@@ -87,11 +87,26 @@ def catalog():
 @admin_required
 def catalog_add():
     if request.method == 'POST':
+        try:
+            watering = int(request.form['watering_interval_days'])
+            harvest = int(request.form['days_to_harvest'])
+        except (ValueError, OverflowError):
+            flash('Введите корректные числовые значения.', 'danger')
+            return render_template('admin/catalog_form.html', entry=None)
+
+        if watering < 1 or harvest < 1:
+            flash('Интервал полива и дней до урожая должны быть положительными числами (минимум 1).', 'danger')
+            return render_template('admin/catalog_form.html', entry=None)
+
+        if watering > 2_000_000_000 or harvest > 2_000_000_000:
+            flash('Слишком большое значение. Введите разумное число.', 'danger')
+            return render_template('admin/catalog_form.html', entry=None)
+
         entry = CropCatalog(
             crop_name=request.form['crop_name'],
             variety=request.form['variety'],
-            watering_interval_days=int(request.form['watering_interval_days']),
-            days_to_harvest=int(request.form['days_to_harvest']),
+            watering_interval_days=watering,
+            days_to_harvest=harvest,
             description=request.form.get('description', ''),
             emoji=request.form.get('emoji', '🌱'),
         )
@@ -108,10 +123,25 @@ def catalog_add():
 def catalog_edit(entry_id):
     entry = CropCatalog.query.get_or_404(entry_id)
     if request.method == 'POST':
+        try:
+            watering = int(request.form['watering_interval_days'])
+            harvest = int(request.form['days_to_harvest'])
+        except (ValueError, OverflowError):
+            flash('Введите корректные числовые значения.', 'danger')
+            return render_template('admin/catalog_form.html', entry=entry)
+
+        if watering < 1 or harvest < 1:
+            flash('Интервал полива и дней до урожая должны быть положительными числами (минимум 1).', 'danger')
+            return render_template('admin/catalog_form.html', entry=entry)
+
+        if watering > 2_000_000_000 or harvest > 2_000_000_000:
+            flash('Слишком большое значение. Введите разумное число.', 'danger')
+            return render_template('admin/catalog_form.html', entry=entry)
+
         entry.crop_name = request.form['crop_name']
         entry.variety = request.form['variety']
-        entry.watering_interval_days = int(request.form['watering_interval_days'])
-        entry.days_to_harvest = int(request.form['days_to_harvest'])
+        entry.watering_interval_days = watering
+        entry.days_to_harvest = harvest
         entry.description = request.form.get('description', '')
         entry.emoji = request.form.get('emoji', '🌱')
         db.session.commit()
